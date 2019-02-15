@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {User} from '../../model/user';
-import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
-import {CookieService} from 'ngx-cookie-service';
-import {API} from '../../app.api';
+import {AuthService} from '../../service/auth.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -13,19 +12,22 @@ export class LoginComponent implements OnInit {
 
   user: User;
 
-  constructor(private httpClient: HttpClient,
-              private cookie: CookieService) { }
+  constructor(private auth: AuthService, private router: Router) {
+  }
 
   ngOnInit() {
     this.user = new User();
   }
 
   login() {
-    console.log(this.user);
-    this.httpClient.post(API + '/login', this.user, { headers: new HttpHeaders({'Content-Type': 'application/json'})}).subscribe(data => {
-      const response = data as HttpResponse<any>;
-      this.cookie.set('TOKEN', response.headers.get('Authorization'));
+    this.auth.login(this.user, (status) => {
+      if (status === 200) {
+        this.router.navigate(['/users']);
+        return;
+      }
+      alert('Usuário ou senha inválida');
     });
   }
+
 
 }
